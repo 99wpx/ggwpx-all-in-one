@@ -1,0 +1,128 @@
+qb-inventory/server
+========================
+
+
+local stashConfigs = {
+    ["govermentshared"] = {
+        webhook = "https://discordapp.com/api/webhooks/1359238382978597094/xoltd5t4Eh1ZxCnLLaUcfs8pKWiaW1M7QJZI6vtN3iV9gZvW7VfAO5C5LwBlDaB6uGKI",
+        monitored = true
+    },
+    ["eastgarageshared"] = {
+        webhook = "https://discordapp.com/api/webhooks/1359238517343129820/k44ajJoYRgPoBgeV5yp0Kl-KCpEqHZ0hJP_kdMHqnTVeKHVJ_zXoiylKKJvrRF4W2e_M",
+        monitored = true
+    },
+    ["policeshared"] = {
+        webhook = "https://discordapp.com/api/webhooks/1359239116981538857/OF58Stsl4PKBUydpROWjQIejBQa4BE2W22Wz7J-wRxsqJiP1DvC65ptHv6tZTEgDscy5",
+        monitored = true
+    },
+    ["restaurantshared"] = {
+        webhook = "https://discordapp.com/api/webhooks/1359238972571914495/-ZLJ17hE-hZViwCipkG7QIGPfXc3BSA_uLHoq3eRmpvrtILKlLk8d0UctDbwJAC1P1RR",
+        monitored = true
+    },
+    ["ambulanceshared"] = {
+        webhook = "https://discordapp.com/api/webhooks/1359239238750572725/KcKdzzmOGlSAUQg003RWUifPHoRjC3U_m9OvyklE622YCPG-86dWTmwymfTQbX_zTaFb",
+        monitored = true
+    },
+}
+
+local function SendToDiscord(stashId, title, message, color)
+    local config = stashConfigs[stashId]
+    if not config or not config.webhook then return end
+
+    local embed = {{
+        ["title"] = title,
+        ["description"] = message,
+        ["color"] = color,
+        ["footer"] = {
+            ["text"] = os.date("%Y-%m-%d %H:%M:%S")
+        }
+    }}
+
+    PerformHttpRequest(config.webhook, function(err, text, headers) end, 'POST', json.encode({
+        username = "Stash Logger",
+        embeds = embed
+    }), { ['Content-Type'] = 'application/json' })
+end
+
+local function AddToStash(stashId, slot, otherslot, itemName, amount, info, created)
+    amount = tonumber(amount) or 1
+    local ItemData = QBCore.Shared.Items[itemName:lower()]
+    if not ItemData then return end
+
+    if not ItemData.unique then
+        if Stashes[stashId].items[slot] and Stashes[stashId].items[slot].name == itemName then
+            Stashes[stashId].items[slot].amount = Stashes[stashId].items[slot].amount + amount
+        else
+            Stashes[stashId].items[slot] = {
+                name = ItemData.name,
+                amount = amount,
+                info = info or "",
+                label = ItemData.label,
+                description = ItemData.description or "",
+                weight = ItemData.weight,
+                type = ItemData.type,
+                unique = ItemData.unique,
+                useable = ItemData.useable,
+                image = ItemData.image,
+                created = created,
+                slot = slot,
+            }
+        end
+    else
+        local targetSlot = Stashes[stashId].items[slot] and Stashes[stashId].items[slot].name == itemName and otherslot or slot
+        Stashes[stashId].items[targetSlot] = {
+            name = ItemData.name,
+            amount = amount,
+            info = info or "",
+            label = ItemData.label,
+            description = ItemData.description or "",
+            weight = ItemData.weight,
+            type = ItemData.type,
+            unique = ItemData.unique,
+            useable = ItemData.useable,
+            image = ItemData.image,
+            created = created,
+            slot = targetSlot,
+        }
+    end
+
+    local config = stashConfigs[stashId]
+    if config and config.monitored then
+        local src = source
+        local Player = QBCore.Functions.GetPlayer(src)
+        if Player then
+            local fullName = Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname
+            local itemLabel = ItemData.label or itemName
+            local msg = ("📥 **%s** menaruh **%sx %s** ke stash **%s**"):format(fullName, amount, itemLabel, stashId)
+            SendToDiscord(stashId, "Barang Masuk Stash", msg, 3145645)
+        end
+    end
+end
+
+local function RemoveFromStash(stashId, slot, itemName, amount)
+    amount = tonumber(amount) or 1
+    local ItemData = QBCore.Shared.Items[itemName:lower()]
+    if not ItemData then return end
+
+    if Stashes[stashId].items[slot] and Stashes[stashId].items[slot].name == itemName then
+        if Stashes[stashId].items[slot].amount > amount then
+            Stashes[stashId].items[slot].amount = Stashes[stashId].items[slot].amount - amount
+        else
+            Stashes[stashId].items[slot] = nil
+        end
+    else
+        Stashes[stashId].items[slot] = nil
+    end
+
+    local config = stashConfigs[stashId]
+    if config and config.monitored then
+        local src = source
+        local Player = QBCore.Functions.GetPlayer(src)
+        if Player then
+            local fullName = Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname
+            local itemLabel = ItemData.label or itemName
+            local msg = ("📤 **%s** mengambil **%sx %s** dari stash **%s**"):format(fullName, amount, itemLabel, stashId)
+            SendToDiscord(stashId, "Barang Keluar Stash", msg, 15158332)
+        end
+    end
+end
