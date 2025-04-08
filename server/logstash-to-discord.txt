@@ -4,23 +4,23 @@ qb-inventory/server
 
 local stashConfigs = {
     ["govermentshared"] = {
-        webhook = "https://discordapp.com/api/webhooks/1359238382978597094/xoltd5t4Eh1ZxCnLLaUcfs8pKWiaW1M7QJZI6vtN3iV9gZvW7VfAO5C5LwBlDaB6uGKI",
+        webhook = "CHANGEME",
         monitored = true
     },
     ["eastgarageshared"] = {
-        webhook = "https://discordapp.com/api/webhooks/1359238517343129820/k44ajJoYRgPoBgeV5yp0Kl-KCpEqHZ0hJP_kdMHqnTVeKHVJ_zXoiylKKJvrRF4W2e_M",
+        webhook = "CHANGEME",
         monitored = true
     },
     ["policeshared"] = {
-        webhook = "https://discordapp.com/api/webhooks/1359239116981538857/OF58Stsl4PKBUydpROWjQIejBQa4BE2W22Wz7J-wRxsqJiP1DvC65ptHv6tZTEgDscy5",
+        webhook = "CHANGEME",
         monitored = true
     },
     ["restaurantshared"] = {
-        webhook = "https://discordapp.com/api/webhooks/1359238972571914495/-ZLJ17hE-hZViwCipkG7QIGPfXc3BSA_uLHoq3eRmpvrtILKlLk8d0UctDbwJAC1P1RR",
+        webhook = "CHANGEME",
         monitored = true
     },
     ["ambulanceshared"] = {
-        webhook = "https://discordapp.com/api/webhooks/1359239238750572725/KcKdzzmOGlSAUQg003RWUifPHoRjC3U_m9OvyklE622YCPG-86dWTmwymfTQbX_zTaFb",
+        webhook = "CHANGEME",
         monitored = true
     },
 }
